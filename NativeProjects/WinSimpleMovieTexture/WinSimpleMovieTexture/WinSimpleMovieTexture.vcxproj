@@ -146,6 +146,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="global.h" />
     <ClInclude Include="IUnityGraphics.h" />
     <ClInclude Include="IUnityGraphicsD3D11.h" />
     <ClInclude Include="IUnityInterface.h" />

@@ -1,17 +1,10 @@
-#include <d3d11.h>
-#include <thread>
-#include <mutex>
-#include <memory>
-
-#include "IUnityInterface.h"
-#include "IUnityGraphics.h"
-#include "IUnityGraphicsD3D11.h"
-
-namespace global {
-	IUnityInterfaces* unity = nullptr;
-}
+#include "global.h"
 
 extern "C" {
+    UNITY_INTERFACE_EXPORT void SetDebugLogFunc(global::DebugLogFuncType func) {
+        global::debugLogFunc = func;
+    }
+
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UnityPluginLoad(IUnityInterfaces* unityInterfaces) {
         global::unity = unityInterfaces;
     }
@@ -29,6 +22,7 @@ extern "C" {
     }
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API SetTexturePtr(void* texturePtr, int width, int height) {
+        global::DebugLog("SetTexturePtr");
         // RGBA
         std::unique_ptr<BYTE[]> colors = std::make_unique<BYTE[]>(width * height * 4);
         // ê‘
