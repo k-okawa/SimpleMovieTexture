@@ -5,6 +5,10 @@ extern "C" {
         global::debugLogFunc = func;
     }
 
+    UNITY_INTERFACE_EXPORT void SetDebugLogErrorFunc(global::DebugLogFuncType func) {
+        global::debugLogErrorFunc = func;
+    }
+
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UnityPluginLoad(IUnityInterfaces* unityInterfaces) {
         global::unity = unityInterfaces;
     }
