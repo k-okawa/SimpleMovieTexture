@@ -29,11 +29,10 @@ namespace global {
 	}
 
 	LPWSTR CharPtrToLPWSTR(char* str) {
-		size_t len = std::strlen(str);
-		std::unique_ptr<wchar_t[]> wText = std::make_unique<wchar_t[]>(len);
+		size_t len = std::strlen(str) + 1;
+		auto wText = new wchar_t[len];
 		size_t ret;
-		mbstowcs_s(&ret, wText.get(), len, str, _TRUNCATE);
-		LPWSTR retStr = wText.get();
-		return retStr;
+		mbstowcs_s(&ret, wText, len, str, _TRUNCATE);
+		return wText;
 	}
 }

@@ -5,8 +5,10 @@
 
 class MoviePlayer {
 public:
-	MoviePlayer(char* filePath);
+	MoviePlayer();
 	~MoviePlayer();
+
+	void Init(char* filePath);
 private:
 
 	AM_MEDIA_TYPE mediaType;
