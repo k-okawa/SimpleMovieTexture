@@ -18,5 +18,6 @@ private:
 	IBaseFilter* _pSampleGrabberFilter = nullptr;
 	ISampleGrabber* _pSampleGrabber = nullptr;
 	IVideoWindow* _pVideoWindow = nullptr;
+	IMediaEvent* _pEvent = nullptr;
 };
 

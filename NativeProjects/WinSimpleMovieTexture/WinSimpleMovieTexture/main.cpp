@@ -53,59 +53,7 @@ extern "C" {
     }
 
     UNITY_INTERFACE_EXPORT void  UNITY_INTERFACE_API MovieTest(char* moviePath) {
-        global::DebugLog("MovieTest");
-        global::DebugLog(moviePath);
-        
-        IGraphBuilder* pGraph = NULL;
-        IMediaControl* pControl = NULL;
-        IMediaEvent* pEvent = NULL;
-
-        // Initialize the COM library.
-        HRESULT hr = CoInitialize(NULL);
-        if (FAILED(hr))
-        {
-            global::DebugLogError("ERROR - Could not initialize COM library");
-            return;
-        }
-
-        global::DebugLog("Finish CoInitialize");
-
-        // Create the filter graph manager and query for interfaces.
-        hr = CoCreateInstance(CLSID_FilterGraph, NULL, CLSCTX_INPROC_SERVER,
-            IID_IGraphBuilder, (void**)&pGraph);
-        if (FAILED(hr))
-        {
-            global::DebugLogError("ERROR - Could not create the Filter Graph Manager.");
-            return;
-        }
-
-        global::DebugLog("Finish CoCreateInstance");
-
-        hr = pGraph->QueryInterface(IID_IMediaControl, (void**)&pControl);
-        hr = pGraph->QueryInterface(IID_IMediaEvent, (void**)&pEvent);
-
-        // Build the graph. IMPORTANT: Change this string to a file on your system.
-        auto wStrPath = global::CharPtrToLPWSTR(moviePath);
-        hr = pGraph->RenderFile(wStrPath, NULL);
-        delete wStrPath;
-        if (SUCCEEDED(hr))
-        {
-            // Run the graph.
-            hr = pControl->Run();
-            if (SUCCEEDED(hr))
-            {
-                // Wait for completion.
-                long evCode;
-                pEvent->WaitForCompletion(INFINITE, &evCode);
-
-                // Note: Do not use INFINITE in a real application, because it
-                // can block indefinitely.
-            }
-        }
-
-        pControl->Release();
-        pEvent->Release();
-        pGraph->Release();
-        CoUninitialize();
+        MoviePlayer player;
+        player.Init(moviePath);
     }
 }
