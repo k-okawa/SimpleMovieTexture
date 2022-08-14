@@ -1,6 +1,8 @@
 using System;
+using System.Collections;
 using System.IO;
 using System.Runtime.InteropServices;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,10 +20,13 @@ public class TextureSample : MonoBehaviour
     public static extern void SetDebugLogErrorFunc(IntPtr ptr);
     
     [DllImport("WinSimpleMovieTexture")]
+    public static extern IntPtr GetRenderEventFunc();
+    
+    [DllImport("WinSimpleMovieTexture")]
     private static extern void SetTexturePtr(IntPtr texturePtr, int width, int height);
 
     [DllImport("WinSimpleMovieTexture")]
-    private static extern void MovieTest(string moviePath);
+    private static extern void MovieTest(string moviePath, IntPtr texturePtr);
 
     [SerializeField] private Image _image;
 
@@ -35,13 +40,24 @@ public class TextureSample : MonoBehaviour
         var ptrError = Marshal.GetFunctionPointerForDelegate(logErrorCallback);
         SetDebugLogErrorFunc(ptrError);
         
-        var tex = new Texture2D(1920, 1080, TextureFormat.RGBA32, false);
+        var tex = new Texture2D(640, 360, TextureFormat.RGBA32, false);
         var sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), Vector2.zero);
         _image.sprite = sprite;
-        SetTexturePtr(tex.GetNativeTexturePtr(), tex.width, tex.height);
+        //SetTexturePtr(tex.GetNativeTexturePtr(), tex.width, tex.height);
 
         string moviePath = Path.Combine(Application.streamingAssetsPath, "TestMovie.wmv");
         moviePath = moviePath.Replace("/", "\\");
-        MovieTest(moviePath);
+        MovieTest(moviePath, tex.GetNativeTexturePtr());
+
+        StartCoroutine(OnRender());
+    }
+
+    IEnumerator OnRender()
+    {
+        while (true)
+        {
+            yield return new WaitForEndOfFrame();
+            GL.IssuePluginEvent(GetRenderEventFunc(), 0);
+        }
     }
 }

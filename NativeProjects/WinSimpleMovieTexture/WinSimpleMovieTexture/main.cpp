@@ -18,8 +18,36 @@ extern "C" {
 
     }
 
+    MoviePlayer* player;
+    ID3D11Texture2D* movieTexture;
+
     void UNITY_INTERFACE_API OnRenderEvent(int eventId) {
-        
+        if (player == nullptr) {
+            return;
+        }
+
+        int width = 640;
+        int height = 360;
+        std::unique_ptr<BYTE[]> colors = std::make_unique<BYTE[]>(width * height * 4);
+        // ê‘
+        for (int h = 0; h < height; h++) {
+            for (int w = 0; w < width; w++) {
+                int index = (h * height + w) * 4;
+                // R
+                colors[index + 0] = UCHAR_MAX;
+                // G
+                colors[index + 1] = 0;
+                // B
+                colors[index + 2] = 0;
+                // A
+                colors[index + 3] = UCHAR_MAX;
+            }
+        }
+
+        auto device = global::unity->Get<IUnityGraphicsD3D11>()->GetDevice();
+        ID3D11DeviceContext* context;
+        device->GetImmediateContext(&context);
+        context->UpdateSubresource(movieTexture, 0, nullptr, colors.get(), 4, 0);
     }
 
     UNITY_INTERFACE_EXPORT UnityRenderingEvent UNITY_INTERFACE_API GetRenderEventFunc() {
@@ -52,8 +80,13 @@ extern "C" {
         context->UpdateSubresource(texture, 0, nullptr, colors.get(), 4, 0);
     }
 
-    UNITY_INTERFACE_EXPORT void  UNITY_INTERFACE_API MovieTest(char* moviePath) {
-        MoviePlayer player;
-        player.Init(moviePath);
+    UNITY_INTERFACE_EXPORT void  UNITY_INTERFACE_API MovieTest(char* moviePath, void* texturePtr) {
+        movieTexture = (ID3D11Texture2D*)texturePtr;
+        player = new MoviePlayer();
+        player->Init(moviePath);
+    }
+
+    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API ReleasePlayer() {
+        delete player;
     }
 }
