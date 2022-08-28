@@ -1,7 +1,7 @@
 #include "MovieTexture.h"
 
 MovieTexture::MovieTexture(LPUNKNOWN pUnk, HRESULT* phr)
-	: CBaseVideoRenderer(__uuidof(CLSID_TextureRenderer), NAME("Texture Renderer"), pUnk, phr) 
+	: CBaseVideoRenderer(__uuidof(CLSID_TextureRenderer), NAME("Texture Renderer"), pUnk, phr)
 {
 	ASSERT(phr);
 	if (phr)
@@ -43,6 +43,59 @@ HRESULT MovieTexture::SetMediaType(const CMediaType* pmt)
 	lVidWidth = pviBmp->bmiHeader.biWidth;
 	lVidHeight = pviBmp->bmiHeader.biHeight;
 	lVidPitch = (lVidWidth * 3 + 3) & ~(3);
+ 
+	pTextureBuffer = std::make_unique<byte[]>(lVidHeight * lVidWidth * 4); // R8G8B8A8
+
+	return S_OK;
+}
+
+HRESULT MovieTexture::DoRenderSample(IMediaSample* pSample)
+{
+	BYTE *pBmpBuffer;
+	BYTE* pTxtBuffer = pTextureBuffer.get();
+
+	BYTE* pbS = NULL;
+	DWORD* pdwS = NULL;
+	DWORD* pdwD = NULL;
+	UINT row, col, dwordWidth;
+
+	CheckPointer(pSample, E_POINTER);
+
+	pSample->GetPointer(&pBmpBuffer);
+
+	dwordWidth = lVidWidth;
+
+	// 32bit
+	for (row = 0; row < (UINT)lVidHeight; row++)
+	{
+		pdwS = (DWORD*)pBmpBuffer;
+		pdwD = (DWORD*)pTxtBuffer;
+
+		for (col = 0; col < dwordWidth; col++)
+		{
+			pdwD[0] = pdwS[0] | 0xFF000000;
+			pdwD[1] = ((pdwS[1] << 8) | 0xFF000000) | (pdwS[0] >> 24);
+			pdwD[2] = ((pdwS[2] << 16) | 0xFF000000) | (pdwS[1] >> 16);
+			pdwD[3] = 0xFF000000 | (pdwS[2] >> 8);
+			pdwD += 4;
+			pdwS += 3;
+		}
+
+		// we might have remaining (misaligned) bytes here
+		pbS = (BYTE*)pdwS;
+		for (col = 0; col < (UINT)lVidWidth % 4; col++)
+		{
+			*pdwD = 0xFF000000 |
+				(pbS[2] << 16) |
+				(pbS[1] << 8) |
+				(pbS[0]);
+			pdwD++;
+			pbS += 3;
+		}
+
+		pBmpBuffer += lVidPitch;
+		pTxtBuffer += lVidWidth * 4;
+	}
 
 	return S_OK;
 }
