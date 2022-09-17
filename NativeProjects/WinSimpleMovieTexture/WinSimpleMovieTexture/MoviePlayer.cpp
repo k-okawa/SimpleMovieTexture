@@ -1,9 +1,7 @@
 #include "MoviePlayer.h"
 #include "project.h"
-#include "MovieTexture.h"
 
-MoviePlayer::MoviePlayer() 
-{
+MoviePlayer::MoviePlayer(){
 	m_pGB = NULL;
 	m_pMC = NULL;
 	m_pMP = NULL;
@@ -11,13 +9,11 @@ MoviePlayer::MoviePlayer()
 	m_pRenderer = NULL;
 }
 
-MoviePlayer::~MoviePlayer()
-{
-
+MoviePlayer::~MoviePlayer(){
+	CleanupDShow();
 }
 
-HRESULT MoviePlayer::Init(char* filePath)
-{
+HRESULT MoviePlayer::Init(char* filePath) {
 	_moviePath.reset(global::CharPtrToLPWSTR(filePath));
 
 	HRESULT hr = S_OK;
@@ -59,9 +55,11 @@ HRESULT MoviePlayer::Init(char* filePath)
 		// WMV, MPEG2
 		CComPtr<IBasicAudio> IAudio;
 		hr = m_pGB.QueryInterface(&IAudio);
+		hr = m_pGB->RenderFile(_moviePath.get(), NULL);
 		if (FAILED(hr)) {
 			return hr;
 		}
+		// volume 0
 		hr = IAudio->put_Volume(0);
 	}
 
@@ -74,5 +72,19 @@ HRESULT MoviePlayer::Init(char* filePath)
 		return hr;
 	}
 
+	global::DebugLog("success init movie");
+
 	return S_OK;
+}
+
+void MoviePlayer::CleanupDShow() {
+	// Shut down the graph
+	if (!(!m_pMC)) m_pMC->Stop();
+
+	//各種オブジェクトの解放
+	if (!(!m_pMC)) m_pMC.Release();
+	if (!(!m_pME)) m_pME.Release();
+	if (!(!m_pMP)) m_pMP.Release();
+	if (!(!m_pGB)) m_pGB.Release();
+	if (!(!m_pRenderer)) m_pRenderer.Release();
 }
