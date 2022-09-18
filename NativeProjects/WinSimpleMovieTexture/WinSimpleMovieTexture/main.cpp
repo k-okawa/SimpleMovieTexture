@@ -1,5 +1,6 @@
 #include "global.h"
 #include "MoviePlayer.h"
+#include <string>
 
 extern "C" {
     UNITY_INTERFACE_EXPORT void SetDebugLogFunc(global::DebugLogFuncType func) {
@@ -21,9 +22,9 @@ extern "C" {
     ID3D11Texture2D* movieTexture;
     MoviePlayer* player;
     void UNITY_INTERFACE_API OnRenderEvent(int eventId) {
-        //if (player == nullptr) {
-        //    return;
-        //}
+        if (player == nullptr) {
+            return;
+        }
 
         int width = 640;
         int height = 360;
@@ -46,7 +47,7 @@ extern "C" {
         auto device = global::unity->Get<IUnityGraphicsD3D11>()->GetDevice();
         ID3D11DeviceContext* context;
         device->GetImmediateContext(&context);
-        context->UpdateSubresource(movieTexture, 0, nullptr, player->GetMovieBuffer(), 4, 0);
+        context->UpdateSubresource(movieTexture, 0, nullptr, player->GetMovieBuffer(), width * 4, 0);
     }
 
     UNITY_INTERFACE_EXPORT UnityRenderingEvent UNITY_INTERFACE_API GetRenderEventFunc() {
@@ -59,16 +60,28 @@ extern "C" {
         std::unique_ptr<BYTE[]> colors = std::make_unique<BYTE[]>(width * height * 4);
         // ê‘
         for (int h = 0; h < height; h++) {
+            //global::DebugLog(std::to_string(h).c_str());
             for (int w = 0; w < width; w++) {
-                int index = (h * height + w) * 4;
-                // R
-                colors[index + 0] = UCHAR_MAX;
-                // G
-                colors[index + 1] = 0;
-                // B
-                colors[index + 2] = 0;
-                // A
-                colors[index + 3] = UCHAR_MAX;
+                int index = (h * width + w) * 4;
+                if (h < height / 2) {
+                    // R
+                    colors[index + 0] = UCHAR_MAX;
+                    // G
+                    colors[index + 1] = 0;
+                    // B
+                    colors[index + 2] = 0;
+                    // A
+                    colors[index + 3] = UCHAR_MAX;
+                }
+                else {
+                    colors[index + 0] = 0;
+                    // G
+                    colors[index + 1] = UCHAR_MAX;
+                    // B
+                    colors[index + 2] = 0;
+                    // A
+                    colors[index + 3] = UCHAR_MAX;
+                }
             }
         }
 
@@ -76,7 +89,7 @@ extern "C" {
         ID3D11DeviceContext* context;
         device->GetImmediateContext(&context);
         ID3D11Texture2D* texture = (ID3D11Texture2D*)texturePtr;
-        context->UpdateSubresource(texture, 0, nullptr, colors.get(), 4, 0);
+        context->UpdateSubresource(texture, 0, nullptr, colors.get(), width * 4, 0);
     }
 
     UNITY_INTERFACE_EXPORT void  UNITY_INTERFACE_API MovieTest(char* moviePath, void* texturePtr) {

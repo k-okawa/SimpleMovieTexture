@@ -42,14 +42,16 @@ HRESULT MoviePlayer::Init(char* filePath) {
 
 	if (SUCCEEDED(hr = pFSrc->FindPin(L"Output", &pFSrcPinOut))) {
 		// AVI,MPEG1,VFW
-		CComPtr<IPin> pFTRPinIn;
-		if (FAILED(hr = pCTR->FindPin(L"In", &pFTRPinIn))) {
-			return hr;
-		}
+		//CComPtr<IPin> pFTRPinIn;
+		//if (FAILED(hr = pCTR->FindPin(L"In", &pFTRPinIn))) {
+		//	return hr;
+		//}
 
-		if (FAILED(hr = m_pGB->Connect(pFSrcPinOut, pFTRPinIn))) {
+		//if (FAILED(hr = m_pGB->Connect(pFSrcPinOut, pFTRPinIn))) {
+		//	return hr;
+		//}
+		if (FAILED(hr = m_pGB->Render(pFSrcPinOut)))
 			return hr;
-		}
 	}
 	else {
 		// WMV, MPEG2

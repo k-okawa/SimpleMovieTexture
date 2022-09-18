@@ -46,68 +46,25 @@ HRESULT MovieTexture::SetMediaType(const CMediaType* pmt) {
 }
 
 HRESULT MovieTexture::DoRenderSample(IMediaSample* pSample) {
-	//BYTE* pTxtBuffer = pTextureBuffer.get();
-	//int width = lVidWidth;
-	//int height = lVidHeight;
-	//// ê‘
-	//for (int h = 0; h < height; h++) {
-	//	for (int w = 0; w < width; w++) {
-	//		int index = (h * height + w) * 4;
-	//		// R
-	//		pTxtBuffer[index + 0] = UCHAR_MAX;
-	//		// G
-	//		pTxtBuffer[index + 1] = 0;
-	//		// B
-	//		pTxtBuffer[index + 2] = 0;
-	//		// A
-	//		pTxtBuffer[index + 3] = UCHAR_MAX;
-	//	}
-	//}
-	//return S_OK;
 	BYTE* pBmpBuffer;
 	BYTE* pTxtBuffer = pTextureBuffer.get();
-
-	BYTE* pbS = NULL;
-	DWORD* pdwS = NULL;
-	DWORD* pdwD = NULL;
-	UINT row, col, dwordWidth;
 
 	CheckPointer(pSample, E_POINTER);
 
 	pSample->GetPointer(&pBmpBuffer);
 
-	dwordWidth = lVidWidth / 4;
-
-	// 32bit
-	for (row = 0; row < (UINT)lVidHeight; row++)
-	{
-		pdwS = (DWORD*)pBmpBuffer;
-		pdwD = (DWORD*)pTxtBuffer;
-
-		for (col = 0; col < dwordWidth; col++)
-		{
-			pdwD[0] = pdwS[0] | 0xFF000000;
-			pdwD[1] = ((pdwS[1] << 8) | 0xFF000000) | (pdwS[0] >> 24);
-			pdwD[2] = ((pdwS[2] << 16) | 0xFF000000) | (pdwS[1] >> 16);
-			pdwD[3] = 0xFF000000 | (pdwS[2] >> 8);
-			pdwD += 4;
-			pdwS += 3;
+	int texIndex = 0;
+	int sampleIndex = 0;
+	for (int h = 0; h < lVidHeight; h++) {
+		for (int w = 0; w < lVidWidth; w++) {
+			BYTE b = pBmpBuffer[sampleIndex++];
+			BYTE g = pBmpBuffer[sampleIndex++];
+			BYTE r = pBmpBuffer[sampleIndex++];
+			pTextureBuffer[texIndex++] = r;
+			pTextureBuffer[texIndex++] = g;
+			pTextureBuffer[texIndex++] = b;
+			pTextureBuffer[texIndex++] = UCHAR_MAX;
 		}
-
-		// we might have remaining (misaligned) bytes here
-		pbS = (BYTE*)pdwS;
-		for (col = 0; col < (UINT)lVidWidth % 4; col++)
-		{
-			*pdwD = 0xFF000000 |
-				(pbS[2] << 16) |
-				(pbS[1] << 8) |
-				(pbS[0]);
-			pdwD++;
-			pbS += 3;
-		}
-
-		pBmpBuffer += lVidPitch;
-		pTxtBuffer += lVidWidth * 4;
 	}
 
 	return S_OK;

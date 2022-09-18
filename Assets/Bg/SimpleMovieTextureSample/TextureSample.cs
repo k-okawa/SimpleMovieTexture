@@ -43,7 +43,7 @@ public class TextureSample : MonoBehaviour
         var tex = new Texture2D(640, 360, TextureFormat.RGBA32, false);
         var sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), Vector2.zero);
         _image.sprite = sprite;
-        //SetTexturePtr(tex.GetNativeTexturePtr(), tex.width, tex.height);
+        // SetTexturePtr(tex.GetNativeTexturePtr(), tex.width, tex.height);
 
         string moviePath = Path.Combine(Application.streamingAssetsPath, "TestMovie.wmv");
         moviePath = moviePath.Replace("/", "\\");
