@@ -17,8 +17,6 @@ HRESULT MoviePlayer::Init(char* filePath) {
 	_moviePath.reset(global::CharPtrToLPWSTR(filePath));
 
 	HRESULT hr = S_OK;
-	CComPtr<IBaseFilter>    pFSrc;          // Source Filter
-	CComPtr<IPin>           pFSrcPinOut;    // Source Filter Output Pin
 	MovieTexture* pCTR = 0;
 
 	if (FAILED(m_pGB.CoCreateInstance(CLSID_FilterGraph, NULL, CLSCTX_INPROC)))
@@ -32,38 +30,15 @@ HRESULT MoviePlayer::Init(char* filePath) {
 	if (FAILED(hr = m_pGB->AddFilter(m_pRenderer, L"TextureRenderer")))
 		return hr;
 
-	hr = m_pGB->AddSourceFilter(_moviePath.get(), L"SOURCE", &pFSrc);
-	if (hr == VFW_E_NOT_FOUND) {
+	// WMV, MPEG2
+	CComPtr<IBasicAudio> IAudio;
+	hr = m_pGB.QueryInterface(&IAudio);
+	hr = m_pGB->RenderFile(_moviePath.get(), NULL);
+	if (FAILED(hr)) {
 		return hr;
 	}
-	else if (FAILED(hr)) {
-		return hr;
-	}
-
-	if (SUCCEEDED(hr = pFSrc->FindPin(L"Output", &pFSrcPinOut))) {
-		// AVI,MPEG1,VFW
-		//CComPtr<IPin> pFTRPinIn;
-		//if (FAILED(hr = pCTR->FindPin(L"In", &pFTRPinIn))) {
-		//	return hr;
-		//}
-
-		//if (FAILED(hr = m_pGB->Connect(pFSrcPinOut, pFTRPinIn))) {
-		//	return hr;
-		//}
-		if (FAILED(hr = m_pGB->Render(pFSrcPinOut)))
-			return hr;
-	}
-	else {
-		// WMV, MPEG2
-		CComPtr<IBasicAudio> IAudio;
-		hr = m_pGB.QueryInterface(&IAudio);
-		hr = m_pGB->RenderFile(_moviePath.get(), NULL);
-		if (FAILED(hr)) {
-			return hr;
-		}
-		// volume 0
-		hr = IAudio->put_Volume(0);
-	}
+	// volume 0
+	hr = IAudio->put_Volume(0);
 
 	// Get the graph's media control, event & position interfaces
 	hr = m_pGB.QueryInterface(&m_pMC);
@@ -73,8 +48,6 @@ HRESULT MoviePlayer::Init(char* filePath) {
 	if (FAILED(hr = m_pMC->Run())) {
 		return hr;
 	}
-
-	global::DebugLog("success init movie");
 
 	return S_OK;
 }

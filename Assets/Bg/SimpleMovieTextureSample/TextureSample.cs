@@ -21,12 +21,9 @@ public class TextureSample : MonoBehaviour
     
     [DllImport("WinSimpleMovieTexture")]
     public static extern IntPtr GetRenderEventFunc();
-    
-    [DllImport("WinSimpleMovieTexture")]
-    private static extern void SetTexturePtr(IntPtr texturePtr, int width, int height);
 
     [DllImport("WinSimpleMovieTexture")]
-    private static extern void MovieTest(string moviePath, IntPtr texturePtr);
+    private static extern bool MovieTest(string moviePath, IntPtr texturePtr);
 
     [SerializeField] private Image _image;
 
@@ -43,11 +40,14 @@ public class TextureSample : MonoBehaviour
         var tex = new Texture2D(640, 360, TextureFormat.RGBA32, false);
         var sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), Vector2.zero);
         _image.sprite = sprite;
-        // SetTexturePtr(tex.GetNativeTexturePtr(), tex.width, tex.height);
 
         string moviePath = Path.Combine(Application.streamingAssetsPath, "TestMovie.wmv");
         moviePath = moviePath.Replace("/", "\\");
-        MovieTest(moviePath, tex.GetNativeTexturePtr());
+        if (!MovieTest(moviePath, tex.GetNativeTexturePtr()))
+        {
+            Debug.LogError("video init failed");
+            return;
+        }
 
         StartCoroutine(OnRender());
     }

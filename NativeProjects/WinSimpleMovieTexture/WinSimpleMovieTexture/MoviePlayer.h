@@ -17,6 +17,12 @@ public:
 	BYTE* GetMovieBuffer() {
 		return m_pRenderer->GetTextureBuffer();
 	}
+	LONG GetWidth() {
+		return m_pRenderer->lVidWidth;
+	}
+	LONG GetHeight() {
+		return m_pRenderer->lVidHeight;
+	}
 private:
 	void CleanupDShow();
 
