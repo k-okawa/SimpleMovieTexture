@@ -45,10 +45,6 @@ HRESULT MoviePlayer::Init(char* filePath) {
 	hr = m_pGB.QueryInterface(&m_pMP);
 	hr = m_pGB.QueryInterface(&m_pME);
 
-	if (FAILED(hr = m_pMC->Run())) {
-		return hr;
-	}
-
 	return S_OK;
 }
 

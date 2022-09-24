@@ -3,14 +3,23 @@
 #include <thread>
 #include <mutex>
 #include <memory>
+#include <map>
 
 #include "IUnityInterface.h"
 #include "IUnityGraphics.h"
 #include "IUnityGraphicsD3D11.h"
 
+#include "MoviePlayer.h"
+
 namespace global {
 	IUnityInterfaces* unity = nullptr;
 
+	// MovieTexture
+	ULONG idIncrement = 1;
+	std::map<ULONG, MoviePlayer*> moviePlayerMap;
+	std::map<ULONG, void*> movieTexturePtrMap;
+
+	// Debug
 	using DebugLogFuncType = void(*)(const char*);
 	DebugLogFuncType debugLogFunc = nullptr;
 	DebugLogFuncType debugLogErrorFunc = nullptr;
@@ -28,6 +37,7 @@ namespace global {
 		debugLogErrorFunc(log);
 	}
 
+	// Util
 	LPWSTR CharPtrToLPWSTR(char* str) {
 		size_t len = std::strlen(str) + 1;
 		auto wText = new wchar_t[len];

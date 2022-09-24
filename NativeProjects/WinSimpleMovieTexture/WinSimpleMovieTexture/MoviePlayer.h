@@ -5,6 +5,7 @@
 #include <thread>
 #include <atlbase.h>
 #include <functional>
+#include <d3d11.h>
 #include "MovieTexture.h"
 
 class MoviePlayer {
@@ -23,6 +24,11 @@ public:
 	LONG GetHeight() {
 		return m_pRenderer->lVidHeight;
 	}
+
+	void Play() {
+		m_pMC->Run();
+	}
+
 private:
 	void CleanupDShow();
 

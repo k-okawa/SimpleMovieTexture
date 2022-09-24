@@ -40,7 +40,9 @@ HRESULT MovieTexture::SetMediaType(const CMediaType* pmt) {
 	lVidHeight = pviBmp->bmiHeader.biHeight;
 	lVidPitch = (lVidWidth * 3 + 3) & ~(3);
  
-	pTextureBuffer = std::make_unique<byte[]>(lVidHeight * lVidWidth * 4); // R8G8B8A8
+	LONG bufferSize = lVidHeight * lVidWidth * 4;
+	pTextureBuffer = std::make_unique<byte[]>(bufferSize); // R8G8B8A8
+	memset(pTextureBuffer.get(), UCHAR_MAX, bufferSize);
 
 	return S_OK;
 }
