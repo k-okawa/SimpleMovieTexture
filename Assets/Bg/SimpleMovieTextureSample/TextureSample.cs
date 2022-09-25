@@ -12,7 +12,7 @@ public class TextureSample : MonoBehaviour
     
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate void DebugLogDelegate(string str);
-    DebugLogDelegate debugLogFunc = Debug.Log;
+    private DebugLogDelegate debugLogFunc = Debug.Log;
     private DebugLogDelegate debugLogErrorFunc = Debug.LogError;
     
     [DllImport(DLL_NAME)]
